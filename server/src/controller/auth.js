@@ -1,7 +1,6 @@
-const db = require('../models/');
 const bcrypt = require('bcrypt');
 const JWT = require('jsonwebtoken');
-const { FindUserWith, CreateUser } = require('../services/user');
+const { FindUserWith, CreateUser } = require('../services/users');
 
 exports.validateToken = (req, res, next) => res.status(200).json({ status: true, message: "Token valid", data: { ...req.user } });
 
