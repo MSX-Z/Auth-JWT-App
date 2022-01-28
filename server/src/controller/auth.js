@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const JWT = require('jsonwebtoken');
 const { FindUserWith, CreateUser } = require('../services/users');
 
-exports.validateToken = (req, res, next) => res.status(200).json({ status: true, message: "Token valid", data: { ...req.user } });
+exports.validateAccessToken = (req, res, next) => res.status(200).json({ status: true, message: "Token valid", data: { ...req.user } });
 
 exports.login = async (req, res, next) => {
     const { email, password } = req.body;
@@ -20,9 +20,16 @@ exports.login = async (req, res, next) => {
                 firstname: user.firstname,
                 lastname: user.lastname,
                 email: user.email
-            }, process.env.SECRET_KEY, { expiresIn: "5min" });
+            }, process.env.SECRET_KEY_ACCESS, { expiresIn: "5min" });
 
-            return res.status(200).json({ status: true, message: "Login successfully.", accessToken });
+            const refreshToken = JWT.sign({
+                uid: user.id,
+                firstname: user.firstname,
+                lastname: user.lastname,
+                email: user.email
+            }, process.env.SECRET_KEY_REFRESH);
+
+            return res.status(200).json({ status: true, message: "Login successfully.", accessToken, refreshToken });
         } else
             return res.status(400).json({ status: false, message: "Email | Password Invalid." });
     } catch (error) {
@@ -37,6 +44,35 @@ exports.register = async (req, res, next) => {
         password = await bcrypt.hash(password, +process.env.SALT_ROUNDS);
         const result = await CreateUser({ firstname, lastname, email, password });
         return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ status: false, message: error.message });
+    }
+}
+
+
+exports.refreshToken = async (req, res, next) => {
+    let { token } = req.body;
+
+    if (!token) return res.status(400).json({ status: false, message: "Tokens are not allowed." });
+
+    try {
+        const decode = await JWT.verify(token, process.env.SECRET_KEY_REFRESH);
+        const { uid, firstname, lastname, email } = decode;
+        const accessToken = JWT.sign({
+            uid,
+            firstname,
+            lastname,
+            email,
+        }, process.env.SECRET_KEY_ACCESS, { expiresIn: "5min" });
+
+        const refreshToken = JWT.sign({
+            uid,
+            firstname,
+            lastname,
+            email,
+        }, process.env.SECRET_KEY_REFRESH);
+
+        return res.status(200).json({ status: true, message: "Successfully.", accessToken, refreshToken });
     } catch (error) {
         return res.status(400).json({ status: false, message: error.message });
     }

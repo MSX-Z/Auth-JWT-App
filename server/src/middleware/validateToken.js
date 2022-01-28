@@ -1,6 +1,6 @@
 const JWT = require('jsonwebtoken');
 
-const validateToken = async (req, res, next) => {
+exports.validateAccessToken = async (req, res, next) => {
     let accessToken = req.headers.authorization;
 
     if (!accessToken) return res.status(400).json({ status: false, message: "Tokens are not allowed." });
@@ -8,7 +8,7 @@ const validateToken = async (req, res, next) => {
     accessToken = accessToken.split(' ')[1];
 
     try {
-        const decode = await JWT.verify(accessToken, process.env.SECRET_KEY);
+        const decode = await JWT.verify(accessToken, process.env.SECRET_KEY_ACCESS);
         req.user = decode;
 
         next();
@@ -16,5 +16,3 @@ const validateToken = async (req, res, next) => {
         return res.status(400).json({ status: false, message: error.message });
     }
 }
-
-module.exports = validateToken;
