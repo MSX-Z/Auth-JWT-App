@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const { generateAccessToken, generateRefreshToken } = require('../services/jwt');
+const redis_client = require('../services/redis');
 const { FindUserWith, CreateUser } = require('../services/users');
 
 exports.verifyAccessToken = (req, res, next) => {
@@ -49,6 +50,26 @@ exports.register = async (req, res, next) => {
         const { password: _, ...data } = result?.dataValues;
 
         return res.status(200).json({ status: true, message: "Register successfully.", data });
+    } catch (error) {
+        return res.status(400).json({ status: false, message: error });
+    }
+}
+
+exports.logout = async (req, res, next) => {
+    const data = req.user;
+    const { id } = data;
+
+
+    try {
+        const _token = await redis_client.get(id.toString());
+        if (!_token)
+            return res.status(400).json({ status: false, message: "Unauthorized." });
+
+        const result = await redis_client.del(id.toString());
+
+        if (!result) return res.status(400).json({ status: false, message: "Logout unsuccessfully." });
+
+        return res.status(200).json({ status: true, message: "Logout successfully." });
     } catch (error) {
         return res.status(400).json({ status: false, message: error });
     }

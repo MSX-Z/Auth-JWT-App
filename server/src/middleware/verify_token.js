@@ -1,4 +1,5 @@
 const JWT = require('jsonwebtoken');
+const redis_client = require('../services/redis');
 
 exports.verifyAccessToken = async (req, res, next) => {
     let accessToken = req.headers.authorization;
@@ -26,6 +27,11 @@ exports.verifyRefreshToken = async (req, res, next) => {
         const decode = await JWT.verify(token, process.env.SECRET_KEY_REFRESH);
         req.user = decode;
 
+        const { id } = decode;
+
+        const _token = await redis_client.get(id.toString());
+        if (!_token || _token !== token)
+            return res.status(400).json({ status: false, message: "Unauthorized." });
         next();
     } catch (error) {
         return res.status(400).json({ status: false, message: error });
