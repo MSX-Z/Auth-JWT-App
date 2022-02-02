@@ -4,8 +4,10 @@ const router = express.Router();
 const controller = require('../controller/auth');
 const { verifyAccessToken, verifyRefreshToken } = require('../middleware/verify_token');
 
-// route
+// get
 router.get('/', verifyAccessToken, controller.verifyAccessToken);
+
+// post
 router.post('/refresh_token', verifyRefreshToken, controller.verifyRefreshToken);
 router.post('/login', controller.login);
 router.post('/register', controller.register);
