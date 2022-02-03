@@ -1,12 +1,13 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useCallback, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../Services/Contexts/AuthContext';
-import API from '../Services/Api/Axios';
-import _ from "lodash";
-import { Alert, AlertTitle, Box, Button, Collapse, Grid, IconButton, Link, TextField, Typography } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
 import { ACCESS_TOKEN, REFRESH_TOKEN, setTokens } from '../Services/util';
-
+import API from '../Services/Api';
+import _ from "lodash";
+import { Box, Grid, Typography } from '@mui/material';
+import AlertBox from '../components/AlertBox';
+import FormBox from '../components/FormBox';
+import Loading from '../components/Loading';
 
 function validateEmail(email) {
     const re = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
@@ -16,9 +17,18 @@ function validateEmail(email) {
 export default function Login() {
     console.log('login render');
     const { Login } = useAuth();
+    const location = useLocation();
     const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({});
     const [error, setError] = useState({ status: false, message: '' });
+
+    let { state } = location;
+    let from = state?.from?.pathname ?? '/home';
+
+    const onClose = useCallback(() => {
+        setError(prev => ({ ...prev, status: false }));
+    }, [error]);
 
     const onChange = (e) => {
         let keys = e.target.name;
@@ -36,145 +46,83 @@ export default function Login() {
         else if (password.length < 8)
             setError({ status: true, message: 'Password must be longer than 8 characters.' });
         else {
+            setIsLoading(true);
             try {
                 const response = await API.post('/login', formData);
                 if (response.status !== 200 || !response.data.status)
                     return;
 
                 const { data: { accessToken, refreshToken } } = response.data;
+                setIsLoading(false);
                 setTokens(ACCESS_TOKEN, accessToken);
                 setTokens(REFRESH_TOKEN, refreshToken);
                 Login(() => {
-                    navigate('/home', { replace: true });
+                    navigate(from, { replace: true });
                 })
             } catch (error) {
-                const { data } = error.response;
-                setError({ status: true, message: data.message });
+                let message = error?.response?.data?.message ?? error.message;
+                setIsLoading(false);
+                setError({ status: true, message });
                 setFormData({});
             }
         }
-    };
+    }
 
     return (
-        <Grid
-            container
-            component="main"
-            sx={{ height: '100vh' }}>
-            <Grid
-                item
-                xs={false}
-                sm={4}
-                md={7}
-                sx={{
-                    backgroundImage: 'url(https://source.unsplash.com/random)',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                }}
-            />
+        <>
+            <Loading isLoading={isLoading} />
             <Grid
                 container
-                justifyContent="center"
-                alignItems="center"
-                item
-                xs={12}
-                sm={8}
-                md={5}>
-                <Box
+                component="main"
+                sx={{ height: '100vh' }}>
+                <Grid
+                    item
+                    xs={false}
+                    sm={4}
+                    md={7}
                     sx={{
-                        position: 'relative',
-                        mx: 4,
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
+                        backgroundImage: 'url(https://source.unsplash.com/random)',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center'
                     }}
-                >
-                    <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
-                        Login
-                    </Typography>
-                    <Box component="form" noValidate autoComplete="off" onSubmit={onSubmit} sx={{ mt: 4 }}>
-                        <TextField
-                            required
-                            margin="normal"
-                            fullWidth
-                            id="email"
-                            name="email"
-                            type="email"
-                            label="Email Address"
-                            autoComplete="email"
-                            placeholder="example@gmail.com"
-                            value={formData?.email ?? ''}
-                            onChange={onChange}
-                        />
-                        <TextField
-                            required
-                            margin="normal"
-                            fullWidth
-                            id="password"
-                            name="password"
-                            type="password"
-                            label="Password"
-                            autoComplete="password"
-                            placeholder="********"
-                            value={formData?.password ?? ''}
-                            onChange={onChange}
-                        />
-                        <Button
-                            type="submit"
-                            fullWidth
-                            variant="contained"
-                            sx={{ mt: 3, mb: 2 }}
-                        >
-                            Login
-                        </Button>
-                        <Grid container>
-                            <Grid item xs>
-                                <Link href="#" variant="body2">
-                                    Forgot password?
-                                </Link>
-                            </Grid>
-                            <Grid item>
-                                <Link href="/register" variant="body2">
-                                    {"Don't have an account? Register"}
-                                </Link>
-                            </Grid>
-                        </Grid>
-                    </Box>
-
+                />
+                <Grid
+                    container
+                    justifyContent="center"
+                    alignItems="center"
+                    item
+                    xs={12}
+                    sm={8}
+                    md={5}>
                     <Box
                         sx={{
-                            mb: 4,
-                            position: 'absolute',
-                            width: '100%',
-                            bottom: 0,
+                            position: 'relative',
+                            mx: 4,
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            alignItems: 'center',
                         }}
                     >
-                        <Collapse in={error.status} orientation='vertical'>
-                            <Alert
-                                severity='error'
-                                action={
-                                    <IconButton
-                                        aria-label="close"
-                                        color="inherit"
-                                        size="small"
-                                        onClick={() => setError(prev => ({ ...prev, status: false }))}
-                                        sx={{
-                                            my: 'auto'
-                                        }}
-                                    >
-                                        <CloseIcon />
-                                    </IconButton>
-                                }
-                            >
-                                <AlertTitle>Error Authentication</AlertTitle>
-                                <Typography>{error.message}</Typography>
-                            </Alert>
-                        </Collapse>
+                        <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
+                            Login
+                        </Typography>
+                        <FormBox formData={formData} onChange={onChange} onSubmit={onSubmit} />
+                        <Box
+                            sx={{
+                                mb: 4,
+                                position: 'absolute',
+                                width: '100%',
+                                bottom: 0,
+                            }}
+                        >
+                            <AlertBox title={"Error Authentication"} error={error} onClose={onClose} />
+                        </Box>
                     </Box>
-                </Box>
+                </Grid>
             </Grid>
-        </Grid>
+        </>
     );
 }

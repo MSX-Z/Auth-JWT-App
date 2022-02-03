@@ -1,30 +1,15 @@
 import { createContext, useEffect, useMemo, useReducer } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { getPathWithAuth, getPathWithOutAuth } from "../../Routes";
+import { useNavigate } from "react-router-dom";
 import { login, logout } from "../Actions/AuthAction";
 import AuthReducer from "../Reducers/AuthReducer";
+import { ACCESS_TOKEN, getTokens } from "../util";
 
 export const AuthContext = createContext(null);
 
 const AuthProvider = (props) => {
-    console.log("provider render");
-    const location = useLocation();
     const navigate = useNavigate();
-
     const [stateAuth, dispatchAuth] = useReducer(AuthReducer, { isAuth: false });
-
-    useEffect(() => {
-        const { isAuth } = stateAuth;
-        const { pathname } = location;
-        if (!isAuth) {
-            if (!getPathWithOutAuth.includes(pathname))
-                navigate('/', { replace: true });
-        } else {
-            if (!getPathWithAuth.includes(pathname))
-                navigate('/home', { replace: true })
-        }
-    }, []);
-
+    console.log("provider render", stateAuth.isAuth);
 
     const Login = (callback) => {
         dispatchAuth(login());
@@ -35,6 +20,15 @@ const AuthProvider = (props) => {
         dispatchAuth(logout());
         callback();
     }
+
+    useEffect(() => {
+        const accessToken = getTokens(ACCESS_TOKEN);
+        if (accessToken) {
+            Login(() => {
+                navigate('/home', { replace: true });
+            })
+        }
+    }, []);
 
     const value = useMemo(() => ({ stateAuth, Login, Logout }), [stateAuth]);
 
