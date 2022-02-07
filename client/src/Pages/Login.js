@@ -1,26 +1,22 @@
 import { useCallback, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../Services/Contexts/AuthContext';
-import { ACCESS_TOKEN, REFRESH_TOKEN, setTokens } from '../Services/util';
+import { ACCESS_TOKEN, REFRESH_TOKEN, setTokens } from '../Utils';
 import API from '../Services/Api';
 import _ from "lodash";
 import { Box, Grid, Typography } from '@mui/material';
-import AlertBox from '../components/AlertBox';
-import FormBox from '../components/FormBox';
-import Loading from '../components/Loading';
-
-function validateEmail(email) {
-    const re = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-    return re.test(email);
-}
+import AlertBox from '../Components/AlertBox';
+import FormBox from '../Components/FormBox';
+import Loading from '../Components/Loading';
+import { validateEmail } from '../Utils';
 
 export default function Login() {
     console.log('login render');
     const { Login } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
-    const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState({ status: false, message: '' });
 
     let { state } = location;
@@ -56,9 +52,7 @@ export default function Login() {
                 setIsLoading(false);
                 setTokens(ACCESS_TOKEN, accessToken);
                 setTokens(REFRESH_TOKEN, refreshToken);
-                Login(() => {
-                    navigate(from, { replace: true });
-                })
+                Login(() => navigate(from, { replace: true }));
             } catch (error) {
                 let message = error?.response?.data?.message ?? error.message;
                 setIsLoading(false);

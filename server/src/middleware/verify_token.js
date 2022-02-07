@@ -25,11 +25,12 @@ exports.verifyRefreshToken = async (req, res, next) => {
 
     try {
         const decode = await JWT.verify(token, process.env.SECRET_KEY_REFRESH);
-        req.user = decode;
 
-        const { id } = decode;
+        const { iat, ...data } = decode;
 
-        const _token = await redis_client.get(id.toString());
+        req.user = data;
+
+        const _token = await redis_client.get(data.id.toString());
         if (!_token || _token !== token)
             return res.status(400).json({ status: false, message: "Unauthorized." });
         next();

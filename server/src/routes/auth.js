@@ -5,7 +5,7 @@ const controller = require('../controller/auth');
 const { verifyAccessToken, verifyRefreshToken } = require('../middleware/verify_token');
 
 // get
-router.get('/', verifyAccessToken, controller.verifyAccessToken);
+router.get('/auth', verifyAccessToken, controller.verifyAccessToken);
 router.get('/hello', (req, res, next) => {
     res.send('Hello')
 });

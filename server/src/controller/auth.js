@@ -8,7 +8,7 @@ exports.verifyAccessToken = (req, res, next) => {
 }
 
 exports.verifyRefreshToken = (req, res, next) => {
-    const data = req.user;
+    const data = { ...req.user };
 
     const accessToken = generateAccessToken(data, { expiresIn: "5min" });
     const refreshToken = generateRefreshToken(data);

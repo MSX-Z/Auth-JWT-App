@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { AppBar, Button, Card, CardActions, CardContent, CardMedia, Grid, Stack, Box, Toolbar, Typography, Container, Link } from '@mui/material/';
 import CameraIcon from '@mui/icons-material/PhotoCamera';
 import { useAuth } from '../Services/Contexts/AuthContext';
-import { ACCESS_TOKEN, removeTokens } from '../Services/util';
+import { ACCESS_TOKEN, removeTokens } from '../Utils';
 
 function Copyright() {
     return (
