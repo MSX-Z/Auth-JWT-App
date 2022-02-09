@@ -2,20 +2,10 @@ import { useNavigate } from 'react-router-dom';
 import { AppBar, Button, Card, CardActions, CardContent, CardMedia, Grid, Stack, Box, Toolbar, Typography, Container, Link } from '@mui/material/';
 import CameraIcon from '@mui/icons-material/PhotoCamera';
 import { useAuth } from '../Services/Contexts/AuthContext';
-import { ACCESS_TOKEN, removeTokens } from '../Utils';
-
-function Copyright() {
-    return (
-        <Typography variant="body2" color="text.secondary" align="center">
-            {'Copyright © '}
-            <Link color="inherit" href="https://mui.com/">
-                Your Website
-            </Link>{' '}
-            {new Date().getFullYear()}
-            {'.'}
-        </Typography>
-    );
-}
+import { TOKENS, removeTokens } from '../Utils';
+import { useEffect } from 'react';
+import HttpClient from '../Services/Api/HttpClient';
+import CopyRight from '../Components/CopyRight';
 
 const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
@@ -23,7 +13,29 @@ export default function Home() {
     console.log('home render');
 
     const navigate = useNavigate();
-    const { stateAuth, Logout } = useAuth();
+    const { Logout } = useAuth();
+
+    const onLogout = async () => {
+        try {
+            const response = await HttpClient.post('/logout');
+            const { status } = response.data;
+            if (status) {
+                removeTokens(TOKENS);
+                Logout(() => {
+                    navigate('/', { replace: true });
+                });
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    useEffect(() => {
+        (async () => {
+            const response = await HttpClient.get('/users/1');
+            console.log('Home data', response.data);
+        })();
+    }, []);
 
     return (
         <Box>
@@ -34,12 +46,7 @@ export default function Home() {
                         Home
                     </Typography>
                     <Button color="inherit" onClick={() => navigate('/setting')}>Setting</Button>
-                    <Button color="inherit" onClick={() => {
-                        removeTokens(ACCESS_TOKEN);
-                        Logout(() => {
-                            navigate('/', { replace: true });
-                        });
-                    }}>Logout</Button>
+                    <Button color="inherit" onClick={onLogout}>Logout</Button>
                 </Toolbar>
             </AppBar>
             <main>
@@ -128,7 +135,7 @@ export default function Home() {
                 >
                     Something here to give the footer a purpose!
                 </Typography>
-                <Copyright />
+                <CopyRight />
             </Box>
             {/* End footer */}
         </Box>

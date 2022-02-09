@@ -1,5 +1,4 @@
-export const ACCESS_TOKEN = process.env.REACT_APP_ACCESS_TOKEN;
-export const REFRESH_TOKEN = process.env.REACT_APP_REFRESH_TOKEN;
+export const TOKENS = process.env.REACT_APP_TOKENS;
 
 export const getTokens = (key) => {
     return localStorage.getItem(key);

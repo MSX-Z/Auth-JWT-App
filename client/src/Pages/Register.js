@@ -1,13 +1,14 @@
 import * as React from 'react';
-import { Button, TextField, FormControlLabel, Checkbox, Link, Grid, Box, Typography, Container } from '@mui/material/';
+import { Button, TextField, FormControlLabel, Checkbox, Grid, Box, Typography, Container, Link as Links } from '@mui/material/';
+import { Link } from 'react-router-dom';
 
 function Copyright(props) {
     return (
         <Typography variant="body2" color="text.secondary" align="center" {...props}>
             {'Copyright © '}
-            <Link color="inherit" href="https://mui.com/">
+            <Links color='inherit' href='https://mui.com/'>
                 Your Website
-            </Link>{' '}
+            </Links>{' '}
             {new Date().getFullYear()}
             {'.'}
         </Typography>
@@ -100,7 +101,7 @@ export default function Register() {
                     </Button>
                     <Grid container justifyContent="flex-end">
                         <Grid item>
-                            <Link href="/" variant="body2">
+                            <Link to='/' style={{ color: '#1976d2', fontFamily: 'Roboto', fontWeight: 400, fontSize: 14 }}>
                                 Already have an account? Login
                             </Link>
                         </Grid>

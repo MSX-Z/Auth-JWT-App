@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../Services/Contexts/AuthContext';
-import { ACCESS_TOKEN, REFRESH_TOKEN, setTokens } from '../Utils';
+import { TOKENS, setTokens } from '../Utils';
 import API from '../Services/Api';
 import _ from "lodash";
 import { Box, Grid, Typography } from '@mui/material';
@@ -48,10 +48,9 @@ export default function Login() {
                 if (response.status !== 200 || !response.data.status)
                     return;
 
-                const { data: { accessToken, refreshToken } } = response.data;
+                const { data } = response.data;
                 setIsLoading(false);
-                setTokens(ACCESS_TOKEN, accessToken);
-                setTokens(REFRESH_TOKEN, refreshToken);
+                setTokens(TOKENS, JSON.stringify(data));
                 Login(() => navigate(from, { replace: true }));
             } catch (error) {
                 let message = error?.response?.data?.message ?? error.message;

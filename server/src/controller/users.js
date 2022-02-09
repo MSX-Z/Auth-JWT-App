@@ -5,7 +5,7 @@ exports.getUserInfo = async (req, res, next) => {
     try {
         let user = await FindUserWith("id", id);
         if (!user)
-            return res.status(404).json({ status: false, message: "That user does not exist." });
+            return res.status(404).json({ status: false, message: "That user does not exist" });
 
         user = {
             uid: user.id,
@@ -14,7 +14,7 @@ exports.getUserInfo = async (req, res, next) => {
             email: user.email
         }
 
-        return res.status(200).json({ status: true, message: "Success.", data: { ...user } });
+        return res.status(200).json({ status: true, message: "Success", data: { ...user } });
     } catch (error) {
         return res.status(404).json({ status: false, message: error.message });
     }

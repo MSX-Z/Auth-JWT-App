@@ -1,4 +1,5 @@
-import { Box, Button, Grid, Link, TextField } from '@mui/material';
+import { Box, Button, Grid, TextField } from '@mui/material';
+import { Link } from 'react-router-dom';
 
 function FormBox(props) {
     const { formData: { email, password }, onChange, onSubmit } = props;
@@ -45,12 +46,12 @@ function FormBox(props) {
                     </Link> */}
                 </Grid>
                 <Grid item>
-                    <Link href="/register" variant="body2">
+                    <Link to='/register' style={{ color: '#1976d2', fontFamily: 'Roboto', fontWeight: 400, fontSize: 14 }}>
                         Don't have an account? Register
                     </Link>
                 </Grid>
             </Grid>
-        </Box>
+        </Box >
     )
 }
 

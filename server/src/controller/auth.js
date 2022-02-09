@@ -10,10 +10,10 @@ exports.verifyAccessToken = (req, res, next) => {
 exports.verifyRefreshToken = (req, res, next) => {
     const data = { ...req.user };
 
-    const accessToken = generateAccessToken(data, { expiresIn: "5min" });
+    const accessToken = generateAccessToken(data, { expiresIn: "1m" });
     const refreshToken = generateRefreshToken(data);
 
-    return res.status(200).json({ status: true, message: "Successfully.", data: { accessToken, refreshToken } });
+    return res.status(200).json({ status: true, message: "Successfully", data: { accessToken, refreshToken } });
 }
 
 exports.login = async (req, res, next) => {
@@ -22,19 +22,19 @@ exports.login = async (req, res, next) => {
     try {
         const user = await FindUserWith("email", email);
         if (!user)
-            return res.status(400).json({ status: false, message: "That user does not exist." });
+            return res.status(400).json({ status: false, message: "That user does not exist" });
 
         const match = await bcrypt.compare(password, user.password);
         if (!match)
-            return res.status(400).json({ status: false, message: "Email | Password Invalid." });
+            return res.status(400).json({ status: false, message: "Email | Password Invalid" });
 
         const { password: _, createdAt, updatedAt, ...data } = user.dataValues;
 
         // generate tokens
-        const accessToken = generateAccessToken(data, { expiresIn: "5min" });
+        const accessToken = generateAccessToken(data, { expiresIn: "1m" });
         const refreshToken = generateRefreshToken(data);
 
-        return res.status(200).json({ status: true, message: "Login successfully.", data: { accessToken, refreshToken } });
+        return res.status(200).json({ status: true, message: "Login successfully", data: { accessToken, refreshToken } });
     } catch (error) {
         res.status(404).json({ status: false, message: error });
     }
@@ -49,7 +49,7 @@ exports.register = async (req, res, next) => {
         const result = await CreateUser({ firstname, lastname, email, password });
         const { password: _, ...data } = result?.dataValues;
 
-        return res.status(200).json({ status: true, message: "Register successfully.", data });
+        return res.status(200).json({ status: true, message: "Register successfully", data });
     } catch (error) {
         return res.status(400).json({ status: false, message: error });
     }
@@ -59,17 +59,16 @@ exports.logout = async (req, res, next) => {
     const data = req.user;
     const { id } = data;
 
-
     try {
         const _token = await redis_client.get(id.toString());
         if (!_token)
-            return res.status(400).json({ status: false, message: "Unauthorized." });
+            return res.status(400).json({ status: false, message: "Unauthorized" });
 
         const result = await redis_client.del(id.toString());
 
-        if (!result) return res.status(400).json({ status: false, message: "Logout unsuccessfully." });
+        if (!result) return res.status(400).json({ status: false, message: "Logout unsuccessfully" });
 
-        return res.status(200).json({ status: true, message: "Logout successfully." });
+        return res.status(200).json({ status: true, message: "Logout successfully" });
     } catch (error) {
         return res.status(400).json({ status: false, message: error });
     }
