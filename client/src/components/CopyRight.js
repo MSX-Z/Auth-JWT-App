@@ -1,8 +1,8 @@
 import { Typography, Link } from "@mui/material";
 
-function CopyRight() {
+function CopyRight(props) {
     return (
-        <Typography variant="body2" color="text.secondary" align="center">
+        <Typography variant="body2" color="text.secondary" align="center" {...props}>
             {'Copyright © '}
             <Link color="inherit" href="https://mui.com/">
                 Your Website

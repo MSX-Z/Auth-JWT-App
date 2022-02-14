@@ -2,18 +2,25 @@ import { useNavigate } from 'react-router-dom';
 import { AppBar, Button, Card, CardActions, CardContent, CardMedia, Grid, Stack, Box, Toolbar, Typography, Container, Link } from '@mui/material/';
 import CameraIcon from '@mui/icons-material/PhotoCamera';
 import { useAuth } from '../Services/Contexts/AuthContext';
-import { TOKENS, removeTokens } from '../Utils';
+import { TOKENS, removeTokens } from '../Services';
 import { useEffect } from 'react';
 import HttpClient from '../Services/Api/HttpClient';
 import CopyRight from '../Components/CopyRight';
 
 const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-export default function Home() {
+function Home() {
     console.log('home render');
 
     const navigate = useNavigate();
-    const { Logout } = useAuth();
+    const { stateAuth: { id }, Logout } = useAuth();
+
+    useEffect(() => {
+        (async () => {
+            const response = await HttpClient.get(`/users/${id}`);
+            console.log('Home data', response.data);
+        })();
+    }, []);
 
     const onLogout = async () => {
         try {
@@ -26,16 +33,9 @@ export default function Home() {
                 });
             }
         } catch (error) {
-            console.log(error);
+            console.log("error", error?.response ?? error.message);
         }
     }
-
-    useEffect(() => {
-        (async () => {
-            const response = await HttpClient.get('/users/1');
-            console.log('Home data', response.data);
-        })();
-    }, []);
 
     return (
         <Box>
@@ -137,7 +137,7 @@ export default function Home() {
                 </Typography>
                 <CopyRight />
             </Box>
-            {/* End footer */}
         </Box>
     );
 }
+export default Home;

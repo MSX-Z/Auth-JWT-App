@@ -1,4 +1,4 @@
-import { TOKENS, getTokens, setTokens } from "../../Utils";
+import { TOKENS, getTokens, setTokens } from "../";
 import Api from "./index";
 
 const instance = Api.create();

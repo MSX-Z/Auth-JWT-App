@@ -34,7 +34,7 @@ exports.login = async (req, res, next) => {
         const accessToken = generateAccessToken(data, { expiresIn: "1m" });
         const refreshToken = generateRefreshToken(data);
 
-        return res.status(200).json({ status: true, message: "Login successfully", data: { accessToken, refreshToken } });
+        return res.status(200).json({ status: true, message: "Login successfully", data: data, tokens: { accessToken, refreshToken } });
     } catch (error) {
         res.status(404).json({ status: false, message: error });
     }

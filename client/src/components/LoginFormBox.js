@@ -1,7 +1,7 @@
 import { Box, Button, Grid, TextField } from '@mui/material';
 import { Link } from 'react-router-dom';
 
-function FormBox(props) {
+function LoginFormBox(props) {
     const { formData: { email, password }, onChange, onSubmit } = props;
     return (
         <Box component="form" noValidate autoComplete="off" onSubmit={onSubmit} sx={{ mt: 4 }}>
@@ -55,4 +55,4 @@ function FormBox(props) {
     )
 }
 
-export default FormBox;
+export default LoginFormBox;

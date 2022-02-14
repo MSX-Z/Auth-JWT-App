@@ -1,19 +1,7 @@
-import { Box, Typography, Container, Link } from '@mui/material/';
+import { Box, Typography, Container } from '@mui/material/';
+import CopyRight from '../Components/CopyRight';
 
-function Copyright() {
-    return (
-        <Typography variant="body2" color="text.secondary">
-            {'Copyright © '}
-            <Link color="inherit" href="https://mui.com/">
-                Your Website
-            </Link>{' '}
-            {new Date().getFullYear()}
-            {'.'}
-        </Typography>
-    )
-}
-
-export default function Setting() {
+function Setting() {
     console.log('setting render');
     return (
         <Box
@@ -51,9 +39,11 @@ export default function Setting() {
                     <Typography variant="body1">
                         Footer can be found here.
                     </Typography>
-                    <Copyright />
+                    <CopyRight />
                 </Container>
             </Box>
         </Box>
     );
 }
+
+export default Setting;

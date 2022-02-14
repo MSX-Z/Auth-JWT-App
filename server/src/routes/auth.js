@@ -6,9 +6,6 @@ const { verifyAccessToken, verifyRefreshToken } = require('../middleware/verify_
 
 // get
 router.get('/auth', verifyAccessToken, controller.verifyAccessToken);
-router.get('/hello', (req, res, next) => {
-    res.send('Hello')
-});
 
 // post
 router.post('/refresh_token', verifyRefreshToken, controller.verifyRefreshToken);

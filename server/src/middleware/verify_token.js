@@ -10,7 +10,7 @@ exports.verifyAccessToken = async (req, res, next) => {
 
     try {
         const decode = await JWT.verify(accessToken, process.env.SECRET_KEY_ACCESS);
-        const { iat, ...data } = decode;
+        const { iat, exp, ...data } = decode;
         req.user = data;
 
         next();

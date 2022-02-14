@@ -1,114 +1,92 @@
-import * as React from 'react';
-import { Button, TextField, FormControlLabel, Checkbox, Grid, Box, Typography, Container, Link as Links } from '@mui/material/';
-import { Link } from 'react-router-dom';
+import { Box, Typography, Container } from '@mui/material/';
+import { useCallback, useEffect, useState } from 'react';
+import AlertBox from '../Components/AlertBox';
+import CopyRight from '../Components/CopyRight';
+import Loading from '../Components/Loading';
+import RegisterFormBox from '../Components/RegisterFormBox';
+import Api from '../Services/Api';
+import { validateEmail, validateName } from '../Utils';
 
-function Copyright(props) {
-    return (
-        <Typography variant="body2" color="text.secondary" align="center" {...props}>
-            {'Copyright © '}
-            <Links color='inherit' href='https://mui.com/'>
-                Your Website
-            </Links>{' '}
-            {new Date().getFullYear()}
-            {'.'}
-        </Typography>
-    );
-}
 
-export default function Register() {
+function Register() {
     console.log('register render');
+    const [isLoading, setIsLoading] = useState(false);
+    const [formData, setFormData] = useState({});
+    const [error, setError] = useState({ status: false, message: '' });
 
-    const handleSubmit = (event) => {
+    const onClose = useCallback(() => {
+        setError(prev => ({ ...prev, status: false }));
+    }, [error]);
+
+    const onChange = (e) => {
+        let keys = e.target.name;
+        let values = (e.target.type !== 'checkbox') ? e.target.value : e.target.checked;
+        setFormData(prev => ({ ...prev, [keys]: values }));
+    }
+
+    const onSubmit = async (event) => {
         event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        // eslint-disable-next-line no-console
-        console.log({
-            email: data.get('email'),
-            password: data.get('password'),
-        });
+        const { firstname, lastname, email, password, terms } = formData;
+        if (!firstname || !lastname || !email || !password)
+            setError({ status: true, message: 'Full Name | Email | Password require.' });
+        else if (!validateName(firstname) || !validateName(lastname))
+            setError({ status: true, message: 'Invalid first & last name format.' });
+        else if (!validateEmail(email))
+            setError({ status: true, message: 'Invalid email format.' });
+        else if (password.length < 8)
+            setError({ status: true, message: 'Password must be longer than 8 characters.' });
+        else if (!terms)
+            setError({ status: true, message: 'Please accept the terms.' });
+        else {
+            setIsLoading(true);
+            try {
+                const response = await Api.post('/register', formData);
+                const { status, message } = response.data;
+                if(status){
+                    setIsLoading(false);
+                    setFormData({});
+                }
+            } catch (error) {
+                console.log('error', error?.response);
+                let message = error?.response?.data?.message.errors[0]?.message ?? error.message;
+                setIsLoading(false);
+                setError({ status: true, message });
+                setFormData({});
+            }
+        }
     };
 
     return (
-        <Container component="main" maxWidth="xs" sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '100vh' }}>
-            <Box
-                sx={{
-                    // marginTop: 8,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifySelf: 'center'
-                }}
-            >
-                <Typography variant="h3" sx={{ fontWeight: 'bold', textAlign: 'center' }}>
-                    Register
-                </Typography>
-                <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: '50px' }}>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                autoComplete="given-name"
-                                name="firstName"
-                                required
-                                fullWidth
-                                id="firstName"
-                                label="First Name"
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                required
-                                fullWidth
-                                id="lastName"
-                                label="Last Name"
-                                name="lastName"
-                                autoComplete="family-name"
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <TextField
-                                required
-                                fullWidth
-                                id="email"
-                                label="Email Address"
-                                name="email"
-                                autoComplete="email"
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <TextField
-                                required
-                                fullWidth
-                                name="password"
-                                label="Password"
-                                type="password"
-                                id="password"
-                                autoComplete="new-password"
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <FormControlLabel
-                                control={<Checkbox value="allowExtraEmails" color="primary" />}
-                                label="I want to receive inspiration, marketing promotions and updates via email."
-                            />
-                        </Grid>
-                    </Grid>
-                    <Button
-                        type="submit"
-                        fullWidth
-                        variant="contained"
-                        sx={{ mt: 3, mb: 2 }}
-                    >
+        <>
+            <Loading isLoading={isLoading} />
+            <Container component="main" maxWidth="xs" sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '100vh' }}>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifySelf: 'center'
+                    }}
+                >
+                    <Typography variant="h3" sx={{ fontWeight: 'bold', textAlign: 'center' }}>
                         Register
-                    </Button>
-                    <Grid container justifyContent="flex-end">
-                        <Grid item>
-                            <Link to='/' style={{ color: '#1976d2', fontFamily: 'Roboto', fontWeight: 400, fontSize: 14 }}>
-                                Already have an account? Login
-                            </Link>
-                        </Grid>
-                    </Grid>
+                    </Typography>
+                    <RegisterFormBox formData={formData} onChange={onChange} onSubmit={onSubmit} />
                 </Box>
-            </Box>
-            <Copyright sx={{ mt: 5 }} />
-        </Container>
+                <Box sx={{ mt: 2, position: 'relative' }}>
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            bottom: -80,
+                            width: '100%'
+                        }}
+                    >
+                        <AlertBox title={"Error Authentication"} error={error} onClose={onClose} />
+                    </Box>
+                </Box>
+                <CopyRight />
+            </Container>
+        </>
     );
 }
+
+export default Register;

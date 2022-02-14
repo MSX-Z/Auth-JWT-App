@@ -1,16 +1,15 @@
 import { useCallback, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../Services/Contexts/AuthContext';
-import { TOKENS, setTokens } from '../Utils';
+import { TOKENS, setTokens } from '../Services';
 import API from '../Services/Api';
-import _ from "lodash";
 import { Box, Grid, Typography } from '@mui/material';
 import AlertBox from '../Components/AlertBox';
-import FormBox from '../Components/FormBox';
+import LoginFormBox from '../Components/LoginFormBox';
 import Loading from '../Components/Loading';
 import { validateEmail } from '../Utils';
 
-export default function Login() {
+function Login() {
     console.log('login render');
     const { Login } = useAuth();
     const location = useLocation();
@@ -29,13 +28,13 @@ export default function Login() {
     const onChange = (e) => {
         let keys = e.target.name;
         let values = e.target.value;
-        setFormData(prev => (!values && (!prev?.password || !prev?.email)) ? ({}) : ({ ...prev, [keys]: values }));
+        setFormData(prev => ({ ...prev, [keys]: values }));
     }
 
     const onSubmit = async (event) => {
         event.preventDefault();
         const { email, password } = formData;
-        if (_.isEmpty(formData) || !email || !password)
+        if (!email || !password)
             setError({ status: true, message: 'Email | Password require.' });
         else if (!validateEmail(email))
             setError({ status: true, message: 'Invalid email format.' });
@@ -48,10 +47,10 @@ export default function Login() {
                 if (response.status !== 200 || !response.data.status)
                     return;
 
-                const { data } = response.data;
+                const { data: { id }, tokens } = response.data;
                 setIsLoading(false);
-                setTokens(TOKENS, JSON.stringify(data));
-                Login(() => navigate(from, { replace: true }));
+                setTokens(TOKENS, JSON.stringify(tokens));
+                Login(id, () => navigate(from, { replace: true }));
             } catch (error) {
                 let message = error?.response?.data?.message ?? error.message;
                 setIsLoading(false);
@@ -102,7 +101,7 @@ export default function Login() {
                         <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
                             Login
                         </Typography>
-                        <FormBox formData={formData} onChange={onChange} onSubmit={onSubmit} />
+                        <LoginFormBox formData={formData} onChange={onChange} onSubmit={onSubmit} />
                         <Box
                             sx={{
                                 mb: 4,
@@ -119,3 +118,5 @@ export default function Login() {
         </>
     );
 }
+
+export default Login
