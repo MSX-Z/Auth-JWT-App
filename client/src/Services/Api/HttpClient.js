@@ -20,10 +20,10 @@ instance.interceptors.response.use((response) => {
     if (error.response) {
         const config = error.config;
         const { status, message } = error.response.data
-        if (!status && message.message === 'jwt expired' && !config._retry) {
+        if (!status && message === 'jwt expired' && !config._retry) {
             config._retry = true;
             const refreshToken = JSON.parse(getTokens(TOKENS))?.refreshToken;
-            if (!refreshToken){
+            if (!refreshToken) {
                 config._retry = false;
                 return Promise.reject(error);
             }

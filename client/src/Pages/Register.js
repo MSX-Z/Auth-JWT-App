@@ -41,14 +41,15 @@ function Register() {
             setIsLoading(true);
             try {
                 const response = await Api.post('/register', formData);
-                const { status, message } = response.data;
-                if(status){
+                const { status } = response.data;
+                if (status) {
                     setIsLoading(false);
                     setFormData({});
                 }
             } catch (error) {
                 console.log('error', error?.response);
-                let message = error?.response?.data?.message.errors[0]?.message ?? error.message;
+                let message = error?.response?.data?.message ?? error.message;
+                message = (message === 'Validation error') ? 'Some of the data has already been used.' : message;
                 setIsLoading(false);
                 setError({ status: true, message });
                 setFormData({});
