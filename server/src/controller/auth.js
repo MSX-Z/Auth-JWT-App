@@ -36,7 +36,7 @@ exports.login = async (req, res, next) => {
 
         return res.status(200).json({ status: true, message: "Login successfully", data: data, tokens: { accessToken, refreshToken } });
     } catch (error) {
-        res.status(404).json({ status: false, message: error });
+        res.status(404).json({ status: false, message: error.message });
     }
 };
 
@@ -51,7 +51,7 @@ exports.register = async (req, res, next) => {
 
         return res.status(200).json({ status: true, message: "Register successfully", data });
     } catch (error) {
-        return res.status(400).json({ status: false, message: error });
+        return res.status(400).json({ status: false, message: error.message });
     }
 }
 
@@ -70,7 +70,7 @@ exports.logout = async (req, res, next) => {
 
         return res.status(200).json({ status: true, message: "Logout successfully" });
     } catch (error) {
-        return res.status(400).json({ status: false, message: error });
+        return res.status(400).json({ status: false, message: error.message });
     }
 }
 

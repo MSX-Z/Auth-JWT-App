@@ -15,7 +15,7 @@ exports.verifyAccessToken = async (req, res, next) => {
 
         next();
     } catch (error) {
-        return res.status(400).json({ status: false, message: error });
+        return res.status(400).json({ status: false, message: error.message });
     }
 }
 
@@ -36,6 +36,6 @@ exports.verifyRefreshToken = async (req, res, next) => {
             return res.status(400).json({ status: false, message: "Unauthorized" });
         next();
     } catch (error) {
-        return res.status(400).json({ status: false, message: error });
+        return res.status(400).json({ status: false, message: error.message });
     }
 }
