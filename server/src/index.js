@@ -20,6 +20,7 @@ app.use('/', authRoute);
 app.use('/users', usersRoute);
 
 db.sequelize.sync().then(() => {
+    console.log("database connection...");
     app.listen(PORT, () => {
         console.log(`Server is running port: ${PORT}`);
     });
