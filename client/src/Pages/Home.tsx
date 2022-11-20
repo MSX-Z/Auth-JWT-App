@@ -1,34 +1,27 @@
 import { useNavigate } from 'react-router-dom';
-import { AppBar, Button, Card, CardActions, CardContent, CardMedia, Grid, Stack, Box, Toolbar, Typography, Container, Link } from '@mui/material/';
+import { AppBar, Button, Card, CardActions, CardContent, CardMedia, Grid, Stack, Box, Toolbar, Typography, Container } from '@mui/material/';
 import CameraIcon from '@mui/icons-material/PhotoCamera';
 import { useAuth } from '../Services/Contexts/AuthContext';
 import { TOKENS, removeTokens } from '../Services';
 import { useEffect } from 'react';
-import HttpClient from '../Services/Api/HttpClient';
+import HttpClient from '../Services/Api/Axios/axios';
 import CopyRight from '../Components/CopyRight';
 
-const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+const mock_cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 function Home() {
     console.log('home render');
 
     const navigate = useNavigate();
-    const { stateAuth: { id }, Logout } = useAuth();
-
-    useEffect(() => {
-        (async () => {
-            const response = await HttpClient.get(`/users/${id}`);
-            console.log('Home data', response.data);
-        })();
-    }, []);
-
+    const { stateAuth, logout } = useAuth() || {};
+   
     const onLogout = async () => {
         try {
             const response = await HttpClient.post('/logout');
             const { status } = response.data;
-            if (status) {
+            if (status && !!logout) {
                 removeTokens(TOKENS);
-                Logout(() => {
+                logout(() => {
                     navigate('/', { replace: true });
                 });
             }
@@ -36,6 +29,16 @@ function Home() {
             console.log("error", error?.response ?? error.message);
         }
     }
+    
+    useEffect(() => {
+        (async () => {
+            if(!stateAuth) return;
+            const { id } = stateAuth;
+
+            const response = await HttpClient.get(`/users/${id}`);
+            console.log('Home data', response.data);
+        })();
+    }, [stateAuth]);
 
     return (
         <Box>
@@ -88,7 +91,7 @@ function Home() {
                 <Container sx={{ py: 8 }} maxWidth="lg">
                     {/* End hero unit */}
                     <Grid container spacing={4}>
-                        {cards.map((card) => (
+                        {mock_cards.map((card: number) => (
                             <Grid item key={card} xs={12} sm={6} md={4}>
                                 <Card
                                     sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}

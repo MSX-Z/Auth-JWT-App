@@ -1,9 +1,16 @@
-import { useMemo } from "react";
+import { ChangeEvent, FormEvent, useMemo } from "react";
 import { Box, Button, Checkbox, FormControlLabel, Grid, TextField } from "@mui/material";
 import { Link } from "react-router-dom";
 import { fullName } from "../Models";
+import { IRegister } from "src/Types/Auth/Form";
 
-function RegisterFormBox(props) {
+type Props = {
+    formData: IRegister;
+    onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+    onSubmit: (event: FormEvent<HTMLFormElement>) => void;  
+}
+
+function RegisterFormBox(props: Props) {
     const { formData: { firstname, lastname, email, password, terms }, onChange, onSubmit } = props;
 
     const randomFullName = useMemo(() => {

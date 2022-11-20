@@ -1,7 +1,11 @@
 import { Box, CircularProgress } from "@mui/material";
 import { memo } from "react";
 
-function Loading(props) {
+type Props = {
+    isLoading: boolean;
+}
+
+function Loading(props: Props) {
     const { isLoading } = props;
     if (!isLoading)
         return (<></>);

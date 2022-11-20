@@ -1,7 +1,15 @@
+import { ChangeEvent, FormEvent } from 'react';
 import { Box, Button, Grid, TextField } from '@mui/material';
 import { Link } from 'react-router-dom';
+import { ILogin } from 'src/Types/Auth/Form';
 
-function LoginFormBox(props) {
+type Props = {
+    formData: ILogin;
+    onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+    onSubmit: (event: FormEvent<HTMLFormElement>) => void;  
+}
+
+function LoginFormBox(props: Props) {
     const { formData: { email, password }, onChange, onSubmit } = props;
     return (
         <Box component="form" noValidate autoComplete="off" onSubmit={onSubmit} sx={{ mt: 4 }}>

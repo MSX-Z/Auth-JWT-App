@@ -1,15 +1,21 @@
 import { createContext, useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { login, logout } from "../Actions/AuthAction";
+import { loginAction, logoutAction } from "../Actions/AuthAction";
 import AuthReducer from "../Reducers/AuthReducer";
-import { TOKENS, getTokens, removeTokens } from "../";
+import { TOKENS, getTokens, removeTokens } from "..";
 import { isRouteWithOutAuth } from "../../Routes";
-import HttpClient from "../Api/HttpClient";
+import HttpClient from "../Api/Axios/axios";
+import { initAuth } from "../Reducers/constant";
+import { IAuthProvider, ICallbackFunction } from "./type";
 
-export const AuthContext = createContext(null);
+type Props = {
+    children?: JSX.Element;
+}
 
-function AuthProvider(props) {
-    const [stateAuth, dispatchAuth] = useReducer(AuthReducer, { isAuth: false, id: -1 });
+export const AuthContext = createContext<IAuthProvider | null>(null);
+
+function AuthProvider(props: Props) {
+    const [stateAuth, dispatchAuth] = useReducer(AuthReducer, initAuth);
     const [isLoad, setIsLoad] = useState(() => !getTokens(TOKENS));
     console.log("provider render", stateAuth.isAuth);
 
@@ -18,19 +24,19 @@ function AuthProvider(props) {
 
     const { pathname } = location;
 
-    const Login = useCallback((id, callback) => {
-        dispatchAuth(login(id));
+    const login = useCallback((id: number, callback: ICallbackFunction) => {
+        dispatchAuth(loginAction(id));
         callback();
     }, []);
 
-    const Logout = useCallback((callback) => {
-        dispatchAuth(logout());
+    const logout = useCallback((callback: ICallbackFunction) => {
+        dispatchAuth(logoutAction());
         callback();
     }, []);
 
     useEffect(() => {
         (async () => {
-            const tokens = JSON.parse(getTokens(TOKENS));
+            const tokens = JSON.parse(getTokens(TOKENS) ?? "");
             const accessToken = tokens?.accessToken;
             const refreshToken = tokens?.refreshToken;
             if (accessToken && refreshToken) {
@@ -38,7 +44,7 @@ function AuthProvider(props) {
                     const response = await HttpClient.get('/auth');
                     const { status, message, data: { id } } = response.data;
                     if (status && message === 'Token valid') {
-                        Login(id, () => {
+                        login(id, () => {
                             navigate(isRouteWithOutAuth(pathname) ? '/home' : pathname, { replace: true });
                         });
                     }
@@ -47,20 +53,20 @@ function AuthProvider(props) {
                         const { status, message } = error.response.data;
                         if (!status && message === "Unauthorized") {
                             removeTokens(TOKENS);
-                            Logout(() => {
+                            logout(() => {
                                 navigate('/', { replace: true });
                             });
                         }
                     }
                     console.log("error", error.name);
                 }
-                setIsLoad(true);
             }
+            setIsLoad(true);
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const value = useMemo(() => ({ stateAuth, Login, Logout }), [stateAuth, Login, Logout]);
+    const value: IAuthProvider = useMemo(() => ({ stateAuth, login, logout }), [stateAuth, login, logout]);
 
     return (
         <AuthContext.Provider value={value} >
