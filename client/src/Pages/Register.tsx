@@ -1,30 +1,40 @@
 import { Box, Typography, Container } from '@mui/material/';
-import { useCallback, useEffect, useState } from 'react';
+import { ChangeEvent, FormEvent, useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { IRegister } from 'src/Types/Auth/Form';
 import AlertBox from '../Components/AlertBox';
 import CopyRight from '../Components/CopyRight';
 import Loading from '../Components/Loading';
 import RegisterFormBox from '../Components/RegisterFormBox';
-import Api from '../Services/Api';
+import Api from '../Services/Api/Axios';
 import { validateEmail, validateName } from '../Utils';
 
 
 function Register() {
     console.log('register render');
-    const [isLoading, setIsLoading] = useState(false);
-    const [formData, setFormData] = useState({});
+    const navigate = useNavigate();
+
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [formData, setFormData] = useState<IRegister>({
+        firstname: "",
+        lastname: "",
+        email: "",
+        password: "",
+        terms: false
+    });
     const [error, setError] = useState({ status: false, message: '' });
 
     const onClose = useCallback(() => {
         setError(prev => ({ ...prev, status: false }));
     }, [error]);
 
-    const onChange = (e) => {
-        let keys = e.target.name;
-        let values = (e.target.type !== 'checkbox') ? e.target.value : e.target.checked;
+    const onChange = (event: ChangeEvent<HTMLInputElement>) => {
+        let keys = event.target.name;
+        let values = (event.target.type !== 'checkbox') ? event.target.value : event.target.checked;
         setFormData(prev => ({ ...prev, [keys]: values }));
     }
 
-    const onSubmit = async (event) => {
+    const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const { firstname, lastname, email, password, terms } = formData;
         if (!firstname || !lastname || !email || !password)
@@ -44,7 +54,8 @@ function Register() {
                 const { status } = response.data;
                 if (status) {
                     setIsLoading(false);
-                    setFormData({});
+                    setFormData({firstname: "", lastname: "", email: "", password: "", terms: false});
+                    navigate('/', { replace: true });
                 }
             } catch (error) {
                 console.log('error', error?.response);
@@ -52,7 +63,7 @@ function Register() {
                 message = (message === 'Validation error') ? 'Some of the data has already been used.' : message;
                 setIsLoading(false);
                 setError({ status: true, message });
-                setFormData({});
+                setFormData({firstname: "", lastname: "", email: "", password: "", terms: false});
             }
         }
     };

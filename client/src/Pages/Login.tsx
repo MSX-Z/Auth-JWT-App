@@ -1,37 +1,39 @@
-import { useCallback, useState } from 'react';
+import { ChangeEvent, FormEvent, useCallback, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../Services/Contexts/AuthContext';
 import { TOKENS, setTokens } from '../Services';
-import API from '../Services/Api';
+import API from '../Services/Api/Axios';
 import { Box, Grid, Typography } from '@mui/material';
 import AlertBox from '../Components/AlertBox';
 import LoginFormBox from '../Components/LoginFormBox';
 import Loading from '../Components/Loading';
 import { validateEmail } from '../Utils';
+import { ILogin } from 'src/Types/Auth/Form';
 
 function Login() {
     console.log('login render');
-    const { Login } = useAuth();
+    const { login } = useAuth() || {};
     const location = useLocation();
     const navigate = useNavigate();
-    const [formData, setFormData] = useState({});
-    const [isLoading, setIsLoading] = useState(false);
+    const [formData, setFormData] = useState<ILogin>({email: "", password: ""});
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState({ status: false, message: '' });
 
     let { state } = location;
-    let from = state?.from?.pathname ?? '/home';
+    //@ts-ignore
+    let from: any = state?.from?.pathname ?? '/home';
 
     const onClose = useCallback(() => {
         setError(prev => ({ ...prev, status: false }));
     }, [error]);
 
-    const onChange = (e) => {
-        let keys = e.target.name;
-        let values = e.target.value;
+    const onChange = (event: ChangeEvent<HTMLInputElement>) => {
+        let keys = event.target.name;
+        let values = event.target.value;
         setFormData(prev => ({ ...prev, [keys]: values }));
     }
 
-    const onSubmit = async (event) => {
+    const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const { email, password } = formData;
         if (!email || !password)
@@ -50,12 +52,14 @@ function Login() {
                 const { data: { id }, tokens } = response.data;
                 setIsLoading(false);
                 setTokens(TOKENS, JSON.stringify(tokens));
-                Login(id, () => navigate(from, { replace: true }));
+                if(login){
+                    login(id, () => navigate(from, { replace: true }));
+                }
             } catch (error) {
                 let message = error?.response?.data?.message ?? error.message;
                 setIsLoading(false);
                 setError({ status: true, message });
-                setFormData({});
+                setFormData({email: "", password: ""});
             }
         }
     }

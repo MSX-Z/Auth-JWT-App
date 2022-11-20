@@ -1,11 +1,13 @@
-import { TOKENS, getTokens, setTokens } from "../";
+import { TOKENS, getTokens, setTokens } from "../..";
 import Api from "./index";
 
 const instance = Api.create();
 instance.interceptors.request.use((config) => {
-    const accessToken = JSON.parse(getTokens(TOKENS))?.accessToken
-    if (!accessToken)
+    let tokens = getTokens(TOKENS);
+    if (!tokens){
         return config;
+    }
+    const accessToken = JSON.parse(tokens).accessToken
     config.headers = {
         'Authorization': `Bearer ${accessToken}`
     }
@@ -22,11 +24,14 @@ instance.interceptors.response.use((response) => {
         const { status, message } = error.response.data
         if (!status && message === 'jwt expired' && !config._retry) {
             config._retry = true;
-            const refreshToken = JSON.parse(getTokens(TOKENS))?.refreshToken;
-            if (!refreshToken) {
+            let tokens = getTokens(TOKENS);
+
+            if (!tokens) {
                 config._retry = false;
                 return Promise.reject(error);
             }
+            
+            const refreshToken = JSON.parse(tokens).refreshToken;
             const payload = { token: refreshToken };
             try {
                 const response = await Api.post('/refresh_token', payload);

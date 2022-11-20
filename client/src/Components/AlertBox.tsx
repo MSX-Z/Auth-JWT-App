@@ -2,7 +2,16 @@ import { Alert, AlertTitle, Collapse, IconButton, Typography } from "@mui/materi
 import CloseIcon from '@mui/icons-material/Close';
 import { memo } from "react";
 
-function AlertBox(props) {
+type Props = {
+    title: string;
+    error: {
+        status: boolean;
+        message: string;
+    }
+    onClose: () => void;
+}
+
+function AlertBox(props: Props) {
     const { title, error: { status, message }, onClose } = props;
     return (
         <Collapse in={status} orientation='vertical'>

@@ -1,6 +1,8 @@
 import { Typography, Link } from "@mui/material";
 
-function CopyRight(props) {
+type Props = {}
+
+function CopyRight(props: Props) {
     return (
         <Typography variant="body2" color="text.secondary" align="center" {...props}>
             {'Copyright © '}
